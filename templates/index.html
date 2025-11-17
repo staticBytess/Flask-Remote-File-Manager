@@ -10,31 +10,38 @@
 
 <body>
     <h1>Files</h1>
-    <form method="POST">
-        {% for file in files %}
-        <label>        
-            <input type="checkbox" id="{{file}}" name=selected_files value="{{file}}"/>
-            {{file}}
-        </label><br>
-        {% endfor %}
-        <button type="submit" name="delete" value="delete">Delete</button>
-        <!-- <button id="process" name="process">Process</button> -->
-        
-    </form>
+<form method="POST">
 
-    <!-- Trigger/Open The Modal -->
-    <button id="process">Process</button>
-    
-    <!-- The Modal -->
+    {% for file in files %}
+    <label>
+        <input type="checkbox" name="selected_files" value="{{file}}">
+        {{file}}
+    </label><br>
+    {% endfor %}
+
+    <button type="submit" name="delete" value="delete">Delete</button>
+
+    <!-- Trigger Modal -->
+    <button type="button" id="process_button">Process</button>
+
+    <!-- Modal -->
     <div id="myModal" class="modal">
-    
-        <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Test..</p>
+
+            {% for script in scripts %}
+            <label>
+                <!-- Radio buttons MUST have their *own* name -->
+                <input type="radio" name="selected_script" value="{{script}}">
+                {{script}}
+            </label><br>
+            {% endfor %}
+            <button type="submit" name="process" value="process">Run</button>
         </div>
-    
     </div>
+
+</form>
+
 </body>
 
 </html>
