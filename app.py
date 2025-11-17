@@ -13,8 +13,6 @@ def hello_world():
     path = os.listdir(path=base_path)
     script_dir = os.path.join(os.path.dirname(__file__), "scripts")
     script_list = os.listdir(script_dir)
-
-    # Filter out only .py files
     scripts = [s for s in script_list if s.endswith(".py")]
 
 
@@ -43,7 +41,6 @@ def show_logs():
     with open("scripts\logs.txt", "r") as file:
         return file.read()
 
-
 def del_files(files):
     for file in files:
         delete_me = os.path.join(base_path, file)
@@ -54,8 +51,18 @@ def del_files(files):
             msg = f'File "{file}" DNE.\n'
         write_log(msg)
 
-            
-
 def write_log(msg):
     with open("scripts\logs.txt", "a") as log:
         log.write(msg)
+
+@app.route("/logs_raw")
+def logs_raw():
+    try:
+        with open("scripts/logs.txt", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
