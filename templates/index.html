@@ -5,43 +5,47 @@
     <meta charset="UTF-8">
     <title>Files</title>
     <script type="text/javascript" src="{{ url_for('static', filename='js/modal.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/logs.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
 <body>
-    <h1>Files</h1>
-<form method="POST">
+    <h1>Files & Logs</h1>
 
-    {% for file in files %}
-    <label>
-        <input type="checkbox" name="selected_files" value="{{file}}">
-        {{file}}
-    </label><br>
-    {% endfor %}
+    <div class="container">
+        <!-- Left side: Files -->
+        <div class="files">
+            <form method="POST">
+                {% for file in files %}
+                <label>
+                    <input type="checkbox" name="selected_files" value="{{file}}">
+                    {{file}}
+                </label><br>
+                {% endfor %}
 
-    <button type="submit" name="delete" value="delete">Delete</button>
+                <button type="submit" name="delete" value="delete">Delete</button>
+                <button type="button" id="process_button">Process</button>
 
-    <!-- Trigger Modal -->
-    <button type="button" id="process_button">Process</button>
-
-    <!-- Modal -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-
-            {% for script in scripts %}
-            <label>
-                <!-- Radio buttons MUST have their *own* name -->
-                <input type="radio" name="selected_script" value="{{script}}">
-                {{script}}
-            </label><br>
-            {% endfor %}
-            <button type="submit" name="process" value="process">Run</button>
+                <!-- Modal -->
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        {% for script in scripts %}
+                        <label>
+                            <input type="radio" name="selected_script" value="{{script}}">
+                            {{script}}
+                        </label><br>
+                        {% endfor %}
+                        <button type="submit" name="process" value="process">Run</button>
+                    </div>
+                </div>
+            </form>
         </div>
+
+        <!-- Right side: Logs -->
+        <div class="logs" id="log_box">Loading logs...</div>
     </div>
-
-</form>
-
 </body>
 
 </html>
