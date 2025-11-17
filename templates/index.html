@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Files</title>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/modal.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
 </head>
 
 <body>
@@ -15,8 +17,24 @@
             {{file}}
         </label><br>
         {% endfor %}
-        <button type="submit" name="action" value="delete">Delete</button>
+        <button type="submit" name="delete" value="delete">Delete</button>
+        <!-- <button id="process" name="process">Process</button> -->
+        
     </form>
+
+    <!-- Trigger/Open The Modal -->
+    <button id="process">Process</button>
+    
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+    
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Test..</p>
+        </div>
+    
+    </div>
 </body>
 
 </html>
