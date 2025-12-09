@@ -9,78 +9,92 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="main-container">
         <h1>Web File Manager</h1>
 
-        <!-- Breadcrumb Navigation -->
-        <div class="breadcrumb">
-            <a href="{{ url_for('index') }}">🏠 Home</a>
-            {% if current_path %}
-            {% set parts = current_path.split('/') %}
-            {% for i in range(parts|length) %}
-            <span>/</span>
-            {% if i == parts|length - 1 %}
-            <span class="current">{{ parts[i] }}</span>
-            {% else %}
-            <a href="{{ url_for('index', req_path='/'.join(parts[:i+1])) }}">{{ parts[i] }}</a>
-            {% endif %}
-            {% endfor %}
-            {% endif %}
-        </div>
-
-        <!-- Selection Info -->
-        {% if selected|length > 0 %}
-        <div class="selection-info">
-            <span class="count">{{ selected|length }}</span> file(s) selected across all folders
-        </div>
-        {% endif %}
-
-        <form method="POST" id="fileForm">
-            <div class="controls">
-                <button type="button" id="process_button" class="green">Process</button>
-                <button type="submit" name="delete" value="delete" class="red">Delete Selected</button>
-                <button type="submit" name="clear_selection" value="clear" class="blue">Clear Selection</button>
-            </div>
-
-            <div class="file-grid">
-                {% for file in files %}
-                <label class="file-card {% if file.full_path in selected %}selected{% endif %}"
-                    data-filepath="{{ file.full_path }}">
-                    <input type="checkbox" name="selected_files" value="{{ file.full_path }}" {% if file.full_path in
-                        selected %}checked{% endif %}>
-
-                    {% if file.is_dir %}
-                    <div class="file-icon">📁</div>
-                    <div class="file-name">
-                        <a href="{{ url_for('index', req_path=(current_path + '/' + file.name) if current_path else file.name) }}"
-                            onclick="event.stopPropagation()">
-                            {{ file.name }}
-                        </a>
-                    </div>
-                    {% else %}
-                    <div class="file-icon">📄</div>
-                    <div class="file-name">{{ file.name }}</div>
-                    {% endif %}
-                </label>
+        <div class="left-section">
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb">
+                <a href="{{ url_for('index') }}">🏠 Home</a>
+                {% if current_path %}
+                {% set parts = current_path.split('/') %}
+                {% for i in range(parts|length) %}
+                <span>/</span>
+                {% if i == parts|length - 1 %}
+                <span class="current">{{ parts[i] }}</span>
+                {% else %}
+                <a href="{{ url_for('index', req_path='/'.join(parts[:i+1])) }}">{{ parts[i] }}</a>
+                {% endif %}
                 {% endfor %}
+                {% endif %}
             </div>
 
-            <!-- Modal -->
-            <div id="myModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2 style="margin-bottom: 20px;">Select Script</h2>
-                    {% for script in scripts %}
-                    <label>
-                        <input type="radio" name="selected_script" value="{{script}}">
-                        {{script}}
+            <!-- Selection Info -->
+            {% if selected|length > 0 %}
+            <div class="selection-info">
+                <span class="count">{{ selected|length }}</span> file(s) selected across all folders
+            </div>
+            {% endif %}
+
+            <form method="POST" id="fileForm">
+                <div class="controls">
+                    <button type="button" id="process_button" class="green">Process</button>
+                    <button type="submit" name="delete" value="delete" class="red">Delete Selected</button>
+                    <button type="submit" name="clear_selection" value="clear" class="blue">Clear Selection</button>
+                </div>
+
+                <div class="file-grid">
+                    {% for file in files %}
+                    <label class="file-card {% if file.full_path in selected %}selected{% endif %}"
+                        data-filepath="{{ file.full_path }}">
+                        <input type="checkbox" name="selected_files" value="{{ file.full_path }}" {% if file.full_path
+                            in selected %}checked{% endif %}>
+
+                        {% if file.is_dir %}
+                        <div class="file-icon">📁</div>
+                        <div class="file-name">
+                            <a href="{{ url_for('index', req_path=(current_path + '/' + file.name) if current_path else file.name) }}"
+                                onclick="event.stopPropagation()">
+                                {{ file.name }}
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="file-icon">📄</div>
+                        <div class="file-name">{{ file.name }}</div>
+                        {% endif %}
                     </label>
                     {% endfor %}
-                    <button type="submit" name="process" value="process" class="green">Run</button>
                 </div>
+
+                <!-- Modal -->
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2 style="margin-bottom: 20px;">Select Script</h2>
+                        {% for script in scripts %}
+                        <label>
+                            <input type="radio" name="selected_script" value="{{script}}">
+                            {{script}}
+                        </label>
+                        {% endfor %}
+                        <button type="submit" name="process" value="process" class="green">Run</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Logs Panel -->
+        <div class="logs-panel">
+            <div class="logs-header">
+                <h2>📋 Logs</h2>
+                <button class="refresh-btn" onclick="refreshLogs()">↻ Refresh</button>
             </div>
-        </form>
+            <div class="logs-content" id="logsContent">
+                <div class="log-empty">No logs yet...</div>
+            </div>
+        </div>
     </div>
+
     <script>
         // Handle file card selection with instant updates
         document.querySelectorAll('.file-card').forEach(card => {
@@ -152,6 +166,43 @@
                 modal.style.display = 'none';
             }
         });
+
+        // Logs functionality
+        async function refreshLogs() {
+            try {
+                const response = await fetch('/logs_raw');
+                const logsText = await response.text();
+                const logsContent = document.getElementById('logsContent');
+
+                if (logsText.trim()) {
+                    const lines = logsText.split('\n');
+                    logsContent.innerHTML = lines
+                        .map(line => `<div class="log-line">${escapeHtml(line)}</div>`)
+                        .join('');
+
+                    // Scroll to bottom to show most recent logs
+                    logsContent.scrollTop = logsContent.scrollHeight;
+                } else {
+                    logsContent.innerHTML = '<div class="log-empty">No logs yet...</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                document.getElementById('logsContent').innerHTML =
+                    '<div class="log-empty">Error loading logs</div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-refresh logs every 3 seconds
+        setInterval(refreshLogs, 3000);
+
+        // Load logs on page load
+        refreshLogs();
     </script>
 </body>
 
