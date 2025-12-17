@@ -1,14 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
+import json
 import importlib
 
 app = Flask(__name__)
-app.secret_key = "super-secret-key"
 
-starting_path = r"C:\Users\david\Desktop\test\test"
-os.environ["PATH"] += os.pathsep + r"C:\ffmpeg\bin"
+with open("config.local.json") as f:
+    config = json.load(f)
 
-SELECTION_FILE = "scripts/selected_files.txt"
+app.secret_key = config["my_key"]
+STARTING_PATH = config["starting_path"]
+SELECTION_FILE = config["selection_file"]
+LOG_PATH = config["log_path"]
 
 
 # SELECTION FILE HELPERS
@@ -75,11 +78,11 @@ def update_selection():
 @app.route("/<path:req_path>", methods=['GET','POST'])
 def index(req_path):
 
-    base_path = starting_path
+    base_path = STARTING_PATH
     abs_path = os.path.join(base_path, req_path)
 
     abs_path = os.path.abspath(abs_path)
-    if not abs_path.startswith(os.path.abspath(starting_path)):
+    if not abs_path.startswith(os.path.abspath(STARTING_PATH)):
         return "Access denied", 403
 
     if os.path.isdir(abs_path):
@@ -146,7 +149,7 @@ def index(req_path):
 @app.route("/logs")
 def show_logs():
     try:
-        with open("scripts/logs.txt", "r") as file:
+        with open(LOG_PATH, "r") as file:
             return file.read()
     except FileNotFoundError:
         return "No logs found"
@@ -155,7 +158,7 @@ def show_logs():
 @app.route("/logs_raw")
 def logs_raw():
     try:
-        with open("scripts/logs.txt", "r", encoding="utf-8") as f:
+        with open(LOG_PATH, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
         return ""
@@ -182,7 +185,7 @@ def del_files(full_paths):
 
 def write_log(msg):
     os.makedirs("scripts", exist_ok=True)
-    with open("scripts/logs.txt", "a", encoding="utf-8") as log:
+    with open(LOG_PATH, "a", encoding="utf-8") as log:
         log.write(msg)
 
 
