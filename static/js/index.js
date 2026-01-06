@@ -67,17 +67,31 @@ async function updateServerSelection(action, filepath, checkbox, card) {
             })
         });
 
-        if (!response.ok) {
+        if (response.ok) {
+            // Update the local array so "View Selected" is accurate without a refresh
+            if (action === 'add') {
+                if (!SELECTED_FILES.includes(filepath)) {
+                    SELECTED_FILES.push(filepath);
+                }
+            } else if (action === 'remove') {
+                const index = SELECTED_FILES.indexOf(filepath);
+                if (index > -1) {
+                    SELECTED_FILES.splice(index, 1);
+                }
+            }
+
+            // Sync the counter display
+            document.getElementById('selectionCount').textContent = SELECTED_FILES.length;
+        } else {
             console.error('Failed to update selection');
+            // Revert UI if server fails
             checkbox.checked = !checkbox.checked;
             card.classList.toggle('selected', checkbox.checked);
-            updateSelectionCount();
         }
     } catch (error) {
         console.error('Error updating selection:', error);
         checkbox.checked = !checkbox.checked;
         card.classList.toggle('selected', checkbox.checked);
-        updateSelectionCount();
     }
 }
 
