@@ -6,3 +6,6 @@ ideas.txt
 tempCodeRunnerFile.py
 config.local.json
 /scripts
+/app/__pycache__
+/app/scripts/__pycache__
+/app/utils/__pycache__

@@ -1,0 +1,141 @@
+import importlib
+from flask import Blueprint, redirect, render_template, request, jsonify, current_app, url_for
+import os
+from .utils.helpers import *
+
+# Define the blueprint + var setup
+main = Blueprint('main', __name__)
+
+
+# AJAX ENDPOINT FOR INSTANT SELECTION UPDATES
+@main.route("/update_selection", methods=['POST'])
+def update_selection():
+    """Handle individual file selection/deselection via AJAX"""
+    data = request.get_json()
+    action = data.get('action')
+    filepath = data.get('filepath')
+    
+    if not filepath:
+        return jsonify({'error': 'No filepath provided'}), 400
+    
+    if action == 'add':
+        add_selected_file(filepath)
+    elif action == 'remove':
+        remove_selected_file(filepath)
+    else:
+        return jsonify({'error': 'Invalid action'}), 400
+    
+    return jsonify({
+        'success': True, 
+        'selected_count': len(get_selected_files())
+    })
+
+
+# INDEX + NAVIGATION
+@main.route("/", defaults={"req_path": ""}, methods=['GET','POST'])
+@main.route("/<path:req_path>", methods=['GET','POST'])
+def index(req_path):
+
+    base_path = current_app.config["STARTING_PATH"]
+    abs_path = os.path.join(base_path, req_path)
+
+    abs_path = os.path.abspath(abs_path)
+    if not abs_path.startswith(os.path.abspath(base_path)):
+        return "Access denied", 403
+
+    # Filter only at root (base_path)
+    if os.path.isdir(abs_path):
+        entries = os.listdir(abs_path)
+        if current_app.config["ONLY_SHOW_ROOT_FOLDERS"] and abs_path.rstrip("\\/") == os.path.abspath(base_path).rstrip("\\/"):
+            entries = [
+                e for e in entries
+                if e in current_app.config["ALLOWED_ROOT_FOLDERS"]
+                and os.path.isdir(os.path.join(abs_path, e))
+            ]
+        files = fileTypes(entries, abs_path)
+    else:
+        return f"{abs_path} is not a directory", 404
+
+
+    if request.method == 'POST':
+
+        if 'clear_selection' in request.form:
+            clear_selected_files()
+            return redirect(url_for('main.index', req_path=req_path))
+
+        # IMPORTANT: Check for delete FIRST and only if the delete input is explicitly set
+        if 'delete' in request.form and request.form.get('delete') == 'delete':
+            delete_targets = get_selected_files()
+            if delete_targets:
+                del_files(delete_targets)
+                clear_selected_files()
+            return redirect(url_for('main.index', req_path=req_path))
+
+        # Process should only run if delete is NOT set
+        if 'process' in request.form:
+            # Double-check that we're not also deleting
+            if request.form.get('delete') == 'delete':
+                write_log("ERROR: Both process and delete were triggered. Ignoring request.\n")
+                return redirect(url_for('main.index', req_path=req_path))
+                
+            process_targets = get_selected_files()
+            selected_script = request.form.get("selected_script", "").strip()
+            
+            if not selected_script:
+                write_log("No script selected\n")
+                return redirect(url_for('main.index', req_path=req_path))
+            
+            if not process_targets:
+                write_log("No files selected\n")
+                return redirect(url_for('main.index', req_path=req_path))
+            
+            try:
+                write_log(f"\n{'='*50}\nStarting script: {selected_script}\nFiles to process: {len(process_targets)}\n{'='*50}\n")
+                
+                module_name = selected_script.replace(".py", "")
+                mod = importlib.import_module(f"app.scripts.{module_name}")
+
+                if hasattr(mod, "main"):
+                    mod.main(list(process_targets))
+                    write_log(f"✓ Successfully processed {len(process_targets)} files with {selected_script}\n")
+                else:
+                    write_log(f"✗ Script '{selected_script}' does NOT define main()\n")
+            except Exception as e:
+                write_log(f"✗ Error running script '{selected_script}': {str(e)}\n")
+                import traceback
+                write_log(traceback.format_exc())
+
+            clear_selected_files()
+            return redirect(url_for('main.index', req_path=req_path))
+
+        return redirect(url_for('main.index', req_path=req_path))
+
+    scripts = get_available_scripts()
+    selected = get_selected_files()
+
+    return render_template(
+        "index.html",
+        files=files,
+        current_path=req_path,
+        selected=list(selected),
+        scripts=scripts
+    )
+
+
+# LOGS
+@main.route("/logs")
+def show_logs():
+    try:
+        with open(current_app.config["LOG_PATH"], "r") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "No logs found"
+
+
+@main.route("/logs_raw")
+def logs_raw():
+    try:
+        with open(current_app.config["LOG_PATH"], "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
