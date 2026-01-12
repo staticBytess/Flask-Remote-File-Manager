@@ -3,6 +3,7 @@ import mimetypes
 import shutil
 from flask import current_app
 from pathlib import Path
+from send2trash import send2trash
 import re
 
 mimetypes.add_type('video/x-matroska', '.mkv')
@@ -12,7 +13,7 @@ def del_files(full_paths):
     for full_path in full_paths:
         if os.path.exists(full_path):
             try:
-                os.remove(full_path)
+                send2trash(full_path)
                 msg = f'✓ Deleted: "{full_path}"\n'
                 deleted_count += 1
             except Exception as e:
