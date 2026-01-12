@@ -10,3 +10,4 @@ config.local.json
 /app/scripts/__pycache__
 /app/utils/__pycache__
 /app/scripts
+/app/scripts
