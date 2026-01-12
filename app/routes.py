@@ -85,10 +85,6 @@ def index(req_path):
                 write_log("No script selected\n")
                 return redirect(url_for('main.index', req_path=req_path))
             
-            if not process_targets:
-                write_log("No files selected\n")
-                return redirect(url_for('main.index', req_path=req_path))
-            
             try:
                 write_log(f"\n{'='*50}\nStarting script: {selected_script}\nFiles to process: {len(process_targets)}\n{'='*50}\n")
                 
@@ -112,7 +108,13 @@ def index(req_path):
             folder_name = request.form.get('folder_name', '').strip()
             create_folder(folder_name, abs_path)
             return redirect(url_for('main.index', req_path=req_path))
-
+        
+        if 'move_here' in request.form:
+            if not get_selected_files():
+                write_log("No files selected\n")
+            else:
+                move_files(abs_path)
+            return redirect(url_for('main.index', req_path=req_path))
 
         return redirect(url_for('main.index', req_path=req_path))
 

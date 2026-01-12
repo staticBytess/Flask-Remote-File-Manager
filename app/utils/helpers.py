@@ -1,5 +1,6 @@
 import os
 import mimetypes
+import shutil
 from flask import current_app
 from pathlib import Path
 import re
@@ -78,6 +79,11 @@ def remove_selected_file(filepath):
     selected.discard(filepath)
     save_selected_files(selected)
 
+def update_selected_file_path(file_path, new_dir):
+    remove_selected_file(file_path)
+    fname = os.path.basename(file_path)
+    new_path = os.path.join(new_dir, fname)
+    add_selected_file(new_path)
 
 def save_selected_files(file_paths):
     """Write selected file paths to the selection file"""
@@ -152,3 +158,26 @@ def rename_file(curr, new):
         write_log(f"Error renaming file: {str(e)}")
 
         
+def move_files(new_path):
+    files = get_selected_files()
+    count = 0
+    skipped = 0
+
+    if not os.path.exists(new_path):
+        os.makedirs(new_path)
+
+    for file in files:
+        try:
+            shutil.move(file, new_path)
+            update_selected_file_path(file, new_path)
+            count += 1
+        except:
+            write_log(f"Unable to move {os.path.basename(file)} into {os.path.basename(new_path)}")
+            skipped += 1
+            continue
+
+    write_log(f"Moved {count} files to {new_path}\n")
+    if skipped > 0:
+        write_log("Ensure files are not being used by another app or process.")
+
+
