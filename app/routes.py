@@ -70,6 +70,13 @@ def index(req_path):
                 del_files(delete_targets)
                 clear_selected_files()
             return redirect(url_for('main.index', req_path=req_path))
+        
+        if 'delete_single_file' in request.form:
+            target_file = request.form.get('delete_single_file')
+            if target_file:
+                remove_selected_file(target_file)
+                del_files([target_file])
+            return redirect(url_for('main.index', req_path=req_path))
 
         # Process should only run if delete is NOT set
         if 'process' in request.form:

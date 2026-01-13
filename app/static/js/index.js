@@ -522,12 +522,10 @@ document.addEventListener('click', async (e) => {
             case 'delete':
                 const filename = filepath.split('/').pop() || filepath.split('\\').pop();
                 if (confirm(`Are you sure you want to delete "${filename}"?`)) {
-                    // Add to selection and trigger delete
-                    checkbox.checked = true;
-                    card.classList.add('selected');
-                    await updateServerSelection('add', filepath, checkbox, card);
-                    document.getElementById('delete_input').value = 'delete';
-                    document.getElementById('fileForm').submit();
+                    const form = document.getElementById('fileForm');
+                    const singleInput = document.getElementById('delete_single_file_input');
+                    singleInput.value = filepath;
+                    form.submit();
                 }
                 break;
 
