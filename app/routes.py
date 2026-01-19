@@ -42,6 +42,10 @@ def index(req_path):
     abs_path = os.path.abspath(abs_path)
     if not abs_path.startswith(os.path.abspath(base_path)):
         return "Access denied", 403
+    
+    # Get sort parameters from request
+    sort_by = request.args.get('sort_by', 'name')  # default: name
+    sort_order = request.args.get('sort_order', 'asc')  # default: ascending
 
     # Filter only at root (base_path)
     if os.path.isdir(abs_path):
@@ -52,7 +56,7 @@ def index(req_path):
                 if e in current_app.config["ALLOWED_ROOT_FOLDERS"]
                 and os.path.isdir(os.path.join(abs_path, e))
             ]
-        files = fileTypes(entries, abs_path)
+        files = fileTypes(entries, abs_path, sort_by, sort_order)
     else:
         return f"{abs_path} is not a directory", 404
 

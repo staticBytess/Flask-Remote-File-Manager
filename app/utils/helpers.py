@@ -27,20 +27,45 @@ def del_files(full_paths):
 
 
 
-def fileTypes(entries, path):
+def fileTypes(entries, path, sort_by='name', sort_order='asc'):
     files = []
     for entry in entries:
         if entry.lower().endswith('.parts'):
             continue
         full_path = os.path.join(path, entry)
+        is_dir = os.path.isdir(full_path)
+
+        # Get file stats for sorting
+        try:
+            stat = os.stat(full_path)
+            size = stat.st_size if not is_dir else 0
+            modified_time = stat.st_mtime
+        except:
+            size = 0
+            modified_time = 0
+
         files.append({
             "name": entry,
             "file_type": identify_file(full_path),
             "full_path": full_path,
-            "is_dir": os.path.isdir(full_path)
+            "is_dir": is_dir,
+            "size": size,
+            "modified_time": modified_time,
         })
 
-    files.sort(key=lambda x: (not x['is_dir'], x['name'].lower()))
+    # Sort based on selected criteria
+    reverse = (sort_order == 'desc')
+    
+    if sort_by == 'name':
+        # Folders first, then alphabetical
+        files.sort(key=lambda x: (not x['is_dir'], x['name'].lower()), reverse=reverse)
+    elif sort_by == 'size':
+        # Folders first, then by size
+        files.sort(key=lambda x: (not x['is_dir'], x['size']), reverse=reverse)
+    elif sort_by == 'modified':
+        # Folders first, then by modified time
+        files.sort(key=lambda x: (not x['is_dir'], x['modified_time']), reverse=reverse)
+    
     return files
 
 

@@ -458,3 +458,105 @@ input[type="checkbox"] {
 .file-card {
     position: relative;
 }
+
+
+.sort-controls {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sort-controls form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.sort-controls label {
+    color: #333;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.sort-controls select {
+    background: white;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sort-controls select:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sort-controls select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.sort-controls select option {
+    background: white;
+    color: #333;
+    padding: 8px;
+}
+
+.sort-controls .divider {
+    width: 1px;
+    height: 30px;
+    background: #e0e0e0;
+    margin: 0 5px;
+}
+
+.sort-controls .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sort-controls .checkbox-label input[type="checkbox"] {
+    display: block;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.sort-controls .checkbox-label span {
+    color: #333;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+@media (max-width: 768px) {
+    .sort-controls form {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .sort-controls select {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .sort-controls .divider {
+        width: 100%;
+        height: 1px;
+        margin: 5px 0;
+    }
+}

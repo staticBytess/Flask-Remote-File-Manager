@@ -574,3 +574,37 @@ async function renameFile(filepath, newName) {
         alert('Error renaming file');
     }
 }
+
+// Hide dmix functionality
+const hideDmixCheckbox = document.getElementById('hideDmixCheckbox');
+
+// Load saved preference from localStorage
+if (localStorage.getItem('hideDmix') === 'true') {
+    hideDmixCheckbox.checked = true;
+    hideDmixFiles();
+}
+
+// Handle checkbox change
+hideDmixCheckbox.addEventListener('change', () => {
+    if (hideDmixCheckbox.checked) {
+        hideDmixFiles();
+        localStorage.setItem('hideDmix', 'true');
+    } else {
+        showDmixFiles();
+        localStorage.setItem('hideDmix', 'false');
+    }
+});
+
+function hideDmixFiles() {
+    const dmixCards = document.querySelectorAll('.file-card.dmix-file');
+    dmixCards.forEach(card => {
+        card.style.display = 'none';
+    });
+}
+
+function showDmixFiles() {
+    const dmixCards = document.querySelectorAll('.file-card.dmix-file');
+    dmixCards.forEach(card => {
+        card.style.display = '';
+    });
+}
