@@ -1,5 +1,5 @@
 import importlib
-from flask import Blueprint, redirect, render_template, request, jsonify, current_app, url_for
+from flask import Blueprint, redirect, render_template, request, jsonify, current_app, url_for, session
 import os
 from .utils.helpers import *
 
@@ -31,12 +31,43 @@ def update_selection():
     })
 
 
+# DRIVE TOGGLE ENDPOINT
+@main.route("/toggle_drive", methods=['POST'])
+def toggle_drive():
+    """Toggle between first and alternate starting paths"""
+    current_drive = session.get('current_drive', 'D')
+    
+    # Toggle the drive
+    if current_drive == 'D':
+        session['current_drive'] = 'E'
+        new_drive = 'E'
+    else:
+        session['current_drive'] = 'D'
+        new_drive = 'D'
+    
+    return jsonify({
+        'success': True,
+        'current_drive': new_drive,
+        'button_text': 'Switch to Drive D' if new_drive == 'E' else 'Switch to Drive E'
+    })
+
+
 # INDEX + NAVIGATION
 @main.route("/", defaults={"req_path": ""}, methods=['GET','POST'])
 @main.route("/<path:req_path>", methods=['GET','POST'])
 def index(req_path):
+    # Get current drive from session (default to 'D')
+    current_drive = session.get('current_drive', 'D')
+    
+    # Choose the appropriate base path based on current drive
+    if current_drive == 'E':
+        base_path = current_app.config.get("ALT_STARTING_PATH", current_app.config["STARTING_PATH"])
+    else:
+        base_path = current_app.config["STARTING_PATH"]
+    
+    # Debug: Log which path is being used
+    write_log(f"Current drive: {current_drive}, Using path: {base_path}")
 
-    base_path = current_app.config["STARTING_PATH"]
     abs_path = os.path.join(base_path, req_path)
 
     abs_path = os.path.abspath(abs_path)
@@ -132,7 +163,7 @@ def index(req_path):
     scripts = get_available_scripts()
     selected = get_selected_files()
 
-    return render_template("index.html", files=files, current_path=req_path, selected=list(selected), scripts=scripts)
+    return render_template("index.html", files=files, current_path=req_path, selected=list(selected), scripts=scripts, current_drive=current_drive)
 
 
 # RENAME

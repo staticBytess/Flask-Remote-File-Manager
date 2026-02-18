@@ -8,6 +8,35 @@ function updateSelectionCount() {
     document.getElementById('selectionCount').textContent = checkedBoxes.length;
 }
 
+// Drive Toggle Button functionality
+const driveToggleBtn = document.getElementById('driveToggleBtn');
+if (driveToggleBtn) {
+    driveToggleBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/toggle_drive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Update button text
+                driveToggleBtn.textContent = data.button_text;
+                // Reload the page to show the new drive's root directory
+                window.location.href = '/';
+            } else {
+                console.error('Failed to toggle drive');
+                alert('Failed to switch drive. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error toggling drive:', error);
+            alert('Error switching drive. Please try again.');
+        }
+    });
+}
+
 // Handle file card selection with instant updates
 document.querySelectorAll('.file-card').forEach(card => {
     const checkbox = card.querySelector('input[type="checkbox"]');

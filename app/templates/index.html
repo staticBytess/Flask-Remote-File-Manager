@@ -37,17 +37,28 @@
                 {% endif %}
             </div>
 
+            <!-- Drive Toggle Button -->
+            <div class="drive-toggle-container" style="margin: 15px 0; text-align: center;">
+                <button type="button" id="driveToggleBtn" class="drive-toggle-btn"
+                    style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background-color 0.3s;">
+                    {{ 'Switch to Drive E' if current_drive == 'D' else 'Switch to Drive D' }}
+                </button>
+            </div>
+
             <div class="sort-controls">
                 <form method="GET" action="{{ url_for('main.index', req_path=current_path if current_path else '') }}"
                     style="display: flex; gap: 10px; align-items: center;">
                     <label for="sort_by">Sort by:</label>
                     <select name="sort_by" id="sort_by" onchange="this.form.submit()">
-                        <option value="name" {% if request.args.get('sort_by', 'name' )=='name' %}selected{% endif %}>Name</option>
-                        <option value="size" {% if request.args.get('sort_by')=='size' %}selected{% endif %}>Size</option>
-                        <option value="modified" {% if request.args.get('sort_by')=='modified' %}selected{% endif %}>Date Modified
+                        <option value="name" {% if request.args.get('sort_by', 'name' )=='name' %}selected{% endif %}>
+                            Name</option>
+                        <option value="size" {% if request.args.get('sort_by')=='size' %}selected{% endif %}>Size
+                        </option>
+                        <option value="modified" {% if request.args.get('sort_by')=='modified' %}selected{% endif %}>
+                            Date Modified
                         </option>
                     </select>
-            
+
                     <label for="sort_order">Order:</label>
                     <select name="sort_order" id="sort_order" onchange="this.form.submit()">
                         <option value="asc" {% if request.args.get('sort_order', 'asc' )=='asc' %}selected{% endif %}>
@@ -61,9 +72,9 @@
                             {% else %}Z → A{% endif %}
                         </option>
                     </select>
-            
+
                     <div class="divider"></div>
-            
+
                     <label class="checkbox-label">
                         <input type="checkbox" id="hideDmixCheckbox">
                         <span>Hide dmix</span>
@@ -82,8 +93,10 @@
                     <button type="button" id="select_all_button" class="purple">Select All</button>
                     <button type="button" id="view_selected_button" class="orange">View Selected</button>
                     <button type="submit" name="clear_selection" value="clear" class="blue">Clear Selection</button>
-                    <button type="submit" name="create_folder" id="create_folder" value="create_folder" class="orange">New Folder</button>
-                    <button type="submit" name="move_here" id="move_here" value="move_here" class="purple">Move Files Here</button>
+                    <button type="submit" name="create_folder" id="create_folder" value="create_folder"
+                        class="orange">New Folder</button>
+                    <button type="submit" name="move_here" id="move_here" value="move_here" class="purple">Move Files
+                        Here</button>
                     <button type="button" id="delete_button" class="red">Delete Selected</button>
                 </div>
 
@@ -132,11 +145,14 @@
                             {% if file.file_type == "folder" %}
                             📁
                             {% elif file.file_type == "img" %}
-                            <img src="{{ url_for('static', filename='assets/img.png') }}" alt="Movie" style="width: 75px;">
+                            <img src="{{ url_for('static', filename='assets/img.png') }}" alt="Movie"
+                                style="width: 75px;">
                             {% elif file.file_type == "vid" %}
-                            <img src="{{ url_for('static', filename='assets/vid.png') }}" alt="Movie" style="width: 75px;">
+                            <img src="{{ url_for('static', filename='assets/vid.png') }}" alt="Movie"
+                                style="width: 75px;">
                             {% elif file.file_type == "txt" %}
-                            <img src="{{ url_for('static', filename='assets/txt.png') }}" alt="Movie" style="width: 75px;">
+                            <img src="{{ url_for('static', filename='assets/txt.png') }}" alt="Movie"
+                                style="width: 75px;">
                             {% else %}
                             📄
                             {% endif %}
