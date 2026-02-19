@@ -64,9 +64,6 @@ def index(req_path):
         base_path = current_app.config.get("ALT_STARTING_PATH", current_app.config["STARTING_PATH"])
     else:
         base_path = current_app.config["STARTING_PATH"]
-    
-    # Debug: Log which path is being used
-    write_log(f"Current drive: {current_drive}, Using path: {base_path}")
 
     abs_path = os.path.join(base_path, req_path)
 
