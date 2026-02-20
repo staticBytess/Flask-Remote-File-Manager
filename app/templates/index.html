@@ -49,13 +49,13 @@
                 <form method="GET" action="{{ url_for('main.index', req_path=current_path if current_path else '') }}"
                     style="display: flex; gap: 10px; align-items: center;">
                     <label for="sort_by">Sort by:</label>
-                    <select name="sort_by" id="sort_by" onchange="this.form.submit()">
+                    <select name="sort_by" id="sort_by" onchange="handleSortByChange(this)">
                         <option value="name" {% if request.args.get('sort_by', 'name' )=='name' %}selected{% endif %}>
                             Name</option>
-                        <option value="size" {% if request.args.get('sort_by')=='size' %}selected{% endif %}>Size
-                        </option>
                         <option value="modified" {% if request.args.get('sort_by')=='modified' %}selected{% endif %}>
                             Date Modified
+                        </option>
+                        <option value="size" {% if request.args.get('sort_by')=='size' %}selected{% endif %}>Size
                         </option>
                     </select>
 
@@ -72,6 +72,19 @@
                             {% else %}Z → A{% endif %}
                         </option>
                     </select>
+
+                    <script>
+                        function handleSortByChange(sortBySelect) {
+                            const sortOrder = document.getElementById('sort_order');
+                            const val = sortBySelect.value;
+                            if (val === 'modified' || val === 'size') {
+                                sortOrder.value = 'desc';
+                            } else {
+                                sortOrder.value = 'asc';
+                            }
+                            sortBySelect.form.submit();
+                        }
+                    </script>
 
                     <div class="divider"></div>
 
