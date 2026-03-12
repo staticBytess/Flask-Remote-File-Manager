@@ -37,12 +37,19 @@
                 {% endif %}
             </div>
 
-            <!-- Drive Toggle Button -->
+            <!-- Drive Selector -->
             <div class="drive-toggle-container" style="margin: 15px 0; text-align: center;">
-                <button type="button" id="driveToggleBtn" class="drive-toggle-btn"
-                    style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background-color 0.3s;">
-                    {{ 'Switch to Drive E' if current_drive == 'D' else 'Switch to Drive D' }}
-                </button>
+                <label for="driveSelect"
+                    style="font-weight: 600; color: white; margin-right: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Select
+                    Drive:</label>
+                <select id="driveSelect" onchange="handleDriveChange(this)"
+                    style="padding: 10px 20px; background-color: white; color: #333; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    {% for i in range(drives|length) %}
+                    <option value="{{ i }}" {% if i==current_drive_index %}selected{% endif %}>
+                        {{ drives[i].label }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="sort-controls">

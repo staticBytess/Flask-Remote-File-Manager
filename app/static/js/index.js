@@ -8,33 +8,26 @@ function updateSelectionCount() {
     document.getElementById('selectionCount').textContent = checkedBoxes.length;
 }
 
-// Drive Toggle Button functionality
-const driveToggleBtn = document.getElementById('driveToggleBtn');
-if (driveToggleBtn) {
-    driveToggleBtn.addEventListener('click', async () => {
-        try {
-            const response = await fetch('/toggle_drive', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+// Drive Select functionality
+async function handleDriveChange(selectEl) {
+    const index = parseInt(selectEl.value, 10);
+    try {
+        const response = await fetch('/select_drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ index })
+        });
 
-            if (response.ok) {
-                const data = await response.json();
-                // Update button text
-                driveToggleBtn.textContent = data.button_text;
-                // Reload the page to show the new drive's root directory
-                window.location.href = '/';
-            } else {
-                console.error('Failed to toggle drive');
-                alert('Failed to switch drive. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error toggling drive:', error);
-            alert('Error switching drive. Please try again.');
+        if (response.ok) {
+            window.location.href = '/';
+        } else {
+            console.error('Failed to select drive');
+            alert('Failed to switch drive. Please try again.');
         }
-    });
+    } catch (error) {
+        console.error('Error selecting drive:', error);
+        alert('Error switching drive. Please try again.');
+    }
 }
 
 // Handle file card selection with instant updates

@@ -12,8 +12,7 @@ def create_app():
         config_data = json.load(f)
 
     app.secret_key = config_data["my_key"]
-    app.config["STARTING_PATH"] = config_data["main_start_path"]
-    app.config["ALT_STARTING_PATH"] = config_data["alt_start_path"]
+    app.config["DRIVE_PATHS"] = config_data["drives"]
     app.config["SELECTION_FILE"] = config_data["selection_file"]
     app.config["LOG_PATH"] = config_data["log_path"]
     app.config["ONLY_SHOW_ROOT_FOLDERS"] = config_data["root_bool"]

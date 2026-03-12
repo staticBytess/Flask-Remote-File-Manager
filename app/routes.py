@@ -31,39 +31,32 @@ def update_selection():
     })
 
 
-# DRIVE TOGGLE ENDPOINT
-@main.route("/toggle_drive", methods=['POST'])
-def toggle_drive():
-    """Toggle between first and alternate starting paths"""
-    current_drive = session.get('current_drive', 'D')
-    
-    # Toggle the drive
-    if current_drive == 'D':
-        session['current_drive'] = 'E'
-        new_drive = 'E'
-    else:
-        session['current_drive'] = 'D'
-        new_drive = 'D'
-    
-    return jsonify({
-        'success': True,
-        'current_drive': new_drive,
-        'button_text': 'Switch to Drive D' if new_drive == 'E' else 'Switch to Drive E'
-    })
+# DRIVE SELECT ENDPOINT
+@main.route("/select_drive", methods=['POST'])
+def select_drive():
+    """Set the active drive by index"""
+    data = request.get_json()
+    index = data.get('index', 0)
+    drives = current_app.config.get("DRIVE_PATHS", [])
+
+    if not isinstance(index, int) or index < 0 or index >= len(drives):
+        return jsonify({'error': 'Invalid drive index'}), 400
+
+    session['current_drive_index'] = index
+    return jsonify({'success': True, 'current_drive_index': index})
 
 
 # INDEX + NAVIGATION
 @main.route("/", defaults={"req_path": ""}, methods=['GET','POST'])
 @main.route("/<path:req_path>", methods=['GET','POST'])
 def index(req_path):
-    # Get current drive from session (default to 'D')
-    current_drive = session.get('current_drive', 'D')
-    
-    # Choose the appropriate base path based on current drive
-    if current_drive == 'E':
-        base_path = current_app.config.get("ALT_STARTING_PATH", current_app.config["STARTING_PATH"])
-    else:
-        base_path = current_app.config["STARTING_PATH"]
+    # Get current drive from session (default to index 0)
+    drives = current_app.config.get("DRIVE_PATHS", [])
+    current_drive_index = session.get('current_drive_index', 0)
+    if not drives:
+        return "No drives configured", 500
+    current_drive_index = max(0, min(current_drive_index, len(drives) - 1))
+    base_path = drives[current_drive_index]["path"]
 
     abs_path = os.path.join(base_path, req_path)
 
@@ -160,7 +153,7 @@ def index(req_path):
     scripts = get_available_scripts()
     selected = get_selected_files()
 
-    return render_template("index.html", files=files, current_path=req_path, selected=list(selected), scripts=scripts, current_drive=current_drive)
+    return render_template("index.html", files=files, current_path=req_path, selected=list(selected), scripts=scripts, drives=drives, current_drive_index=current_drive_index)
 
 
 # RENAME
