@@ -99,6 +99,11 @@
                         <input type="checkbox" id="hideDmixCheckbox">
                         <span>Hide dmix</span>
                     </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="hideEnesCheckbox">
+                        <span>Hide enes</span>
+                    </label>
                 </form>
             </div>
 
@@ -126,8 +131,13 @@
 
                 <div class="file-grid">
                     {% for file in files %}
+                    {# Name-based highlighting (files only, case-insensitive) #}
+                    {% set name_lower = file.name.lower() %}
+                    {% set stem_lower = name_lower.rsplit('.', 1)[0] %}
+                    {% set is_dmix = not file.is_dir and 'dmix' in name_lower %}
+                    {% set is_enes = not file.is_dir and (' enes ' in name_lower or name_lower.endswith(' enes') or stem_lower.endswith(' enes')) %}
                     <label
-                        class="file-card {% if file.full_path in selected %}selected{% endif %} {% if not file.is_dir and file.name.lower().endswith(('dmix.mkv', 'dmix.mp4', 'dmix.avi', 'dmix.mov')) %}dmix-file{% endif %}"
+                        class="file-card {% if file.full_path in selected %}selected{% endif %}{% if is_dmix %} dmix-file{% endif %}{% if is_enes %} enes-file{% endif %}{% if is_dmix and is_enes %} dmix-enes-file{% endif %}"
                         data-filepath="{{ file.full_path }}" data-is-dir="{{ 'true' if file.is_dir else 'false' }}">
 
                         {% if file.is_dir %}

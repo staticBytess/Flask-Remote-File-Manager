@@ -597,36 +597,36 @@ async function renameFile(filepath, newName) {
     }
 }
 
-// Hide dmix functionality
+// Hide dmix / enes functionality
 const hideDmixCheckbox = document.getElementById('hideDmixCheckbox');
+const hideEnesCheckbox = document.getElementById('hideEnesCheckbox');
 
-// Load saved preference from localStorage
-if (localStorage.getItem('hideDmix') === 'true') {
-    hideDmixCheckbox.checked = true;
-    hideDmixFiles();
+// A card is hidden if ANY active filter matches it, so files that are both
+// dmix and enes stay hidden until both checkboxes are cleared.
+function applyHideFilters() {
+    const hideDmix = hideDmixCheckbox.checked;
+    const hideEnes = hideEnesCheckbox.checked;
+
+    document.querySelectorAll('.file-card').forEach(card => {
+        const shouldHide =
+            (hideDmix && card.classList.contains('dmix-file')) ||
+            (hideEnes && card.classList.contains('enes-file'));
+        card.style.display = shouldHide ? 'none' : '';
+    });
 }
 
-// Handle checkbox change
+// Load saved preferences from localStorage
+hideDmixCheckbox.checked = localStorage.getItem('hideDmix') === 'true';
+hideEnesCheckbox.checked = localStorage.getItem('hideEnes') === 'true';
+applyHideFilters();
+
+// Handle checkbox changes
 hideDmixCheckbox.addEventListener('change', () => {
-    if (hideDmixCheckbox.checked) {
-        hideDmixFiles();
-        localStorage.setItem('hideDmix', 'true');
-    } else {
-        showDmixFiles();
-        localStorage.setItem('hideDmix', 'false');
-    }
+    localStorage.setItem('hideDmix', String(hideDmixCheckbox.checked));
+    applyHideFilters();
 });
 
-function hideDmixFiles() {
-    const dmixCards = document.querySelectorAll('.file-card.dmix-file');
-    dmixCards.forEach(card => {
-        card.style.display = 'none';
-    });
-}
-
-function showDmixFiles() {
-    const dmixCards = document.querySelectorAll('.file-card.dmix-file');
-    dmixCards.forEach(card => {
-        card.style.display = '';
-    });
-}
+hideEnesCheckbox.addEventListener('change', () => {
+    localStorage.setItem('hideEnes', String(hideEnesCheckbox.checked));
+    applyHideFilters();
+});
